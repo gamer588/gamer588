@@ -1,0 +1,62 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
+class AppBuilder:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Simple App Builder")
+        self.root.geometry("600x400")
+
+        self.canvas = tk.Canvas(root, bg="white", width=400, height=350)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.sidebar = tk.Frame(root, width=200, bg="lightgray")
+        self.sidebar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        tk.Label(self.sidebar, text="Components", bg="lightgray").pack()
+
+        self.create_buttons()
+        self.widgets = []
+
+    def create_buttons(self):
+        btn_button = tk.Button(self.sidebar, text="Button", command=lambda: self.add_widget("button"))
+        btn_button.pack(fill=tk.X)
+
+        btn_label = tk.Button(self.sidebar, text="Label", command=lambda: self.add_widget("label"))
+        btn_label.pack(fill=tk.X)
+
+        btn_generate = tk.Button(self.sidebar, text="Generate Code", command=self.generate_code)
+        btn_generate.pack(fill=tk.X)
+
+    def add_widget(self, widget_type):
+        if widget_type == "button":
+            widget = tk.Button(self.canvas, text="Button")
+        else:
+            widget = tk.Label(self.canvas, text="Label", bg="yellow")
+
+        widget.place(x=50, y=50)
+        self.widgets.append(widget)
+
+    def generate_code(self):
+        code = """import tkinter as tk\n\nroot = tk.Tk()\nroot.geometry('400x350')\n"""
+        
+        for i, widget in enumerate(self.widgets):
+            if isinstance(widget, tk.Button):
+                code += f"btn{i} = tk.Button(root, text='Button')\n"
+                code += f"btn{i}.place(x={widget.winfo_x()}, y={widget.winfo_y()})\n"
+            elif isinstance(widget, tk.Label):
+                code += f"lbl{i} = tk.Label(root, text='Label', bg='yellow')\n"
+                code += f"lbl{i}.place(x={widget.winfo_x()}, y={widget.winfo_y()})\n"
+        
+        code += "\nroot.mainloop()\n"
+
+        file_path = filedialog.asksaveasfilename(defaultextension=".py", filetypes=[("Python Files", "*.py")])
+        if file_path:
+            with open(file_path, "w") as f:
+                f.write(code)
+            messagebox.showinfo("Success", "Python Code Generated!")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = AppBuilder(root)
+    root.mainloop()
